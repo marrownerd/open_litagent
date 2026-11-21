@@ -54,6 +54,29 @@ python train.py --dataset data/train.jsonl --mode lora-cpu \
   --output-dir adapters/academic-cpu --max-length 256 --max-steps 5
 ```
 
+Training logs the configuration, progress, loss, learning rate, and gradient norm
+to the console and `train.log` in the output directory. The same directory contains
+`train_results.json` with the final training metrics and `eval_results.json` with
+validation metrics computed from greedy generations.
+
+By default, validation holds out roughly 20% of the source groups per task using
+a fixed seed. Variants of the same research question or synthetic study stay
+together. Set the fraction with `--eval-fraction`, or pass an independently
+held-out JSONL in the same format with `--eval-dataset`.
+
+- **Both tasks** report the fraction of outputs that are valid JSON objects.
+- **Search** reports schema validity, action accuracy, provider accuracy on
+  examples whose reference calls for a search, and exact JSON object match.
+- **Extraction** reports schema validity, exact matches for the full object and
+  individual fields, and the fraction of emitted non-null evidence values that
+  appear in the abstract after whitespace normalization. Field matching includes
+  expected nulls. Grounding measures quote presence.
+
+Rates range from 0 to 1. Each rate has a companion `_count` with its denominator
+and is omitted if there are zero eligible examples. The bundled synthetic
+dataset measures pipeline behavior. Use expert-labeled held-out examples to
+assess research quality.
+
 # Run the agent
 
 Run with the base Transformers model on CPU or CUDA:
